@@ -1,8 +1,7 @@
-# Authors: Martin Billinger <martin.billinger@tugraz.at>
-#
-# License: BSD (3-clause)
-
 import numpy as np
+import pandas as pd
+import mne
+from mne import Epochs
 import matplotlib.pyplot as plt
 
 import sklearn.pipeline
@@ -15,44 +14,30 @@ from mne.io import concatenate_raws, read_raw_edf
 from mne.datasets import eegbci
 import mne.decoding
 
-# print(__doc__)
+path = "C:/Users/dk334/workspace/mne-example/data/afujii_MIK_20_07_2017_17_00_48_0000.mat.csv_cuntom.csv_fix.csv"
+data = np.loadtxt(path, delimiter=",", skiprows=1).T
+ch_types = ["eeg" for i in range(16)] + ["stim"]
+ch_names = ["Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "T3", "C3", "Cz", "C4", "T4", "T5", "P3", "Pz", "P4", "STIM"]
+# ch_names = ["Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "T3", "C3", "Cz", "C4", "T4", "T5", "P3", "Pz", "P4", "T6", "STIM"]
 
-mne.set_log_level('WARNING')
-
-# #############################################################################
-# # Set parameters and read data
-
-# 開始後1秒後に始まるエポックを用いて誘発反応の分類を避ける
-event_id = dict(hands=2, feet=3)
-subject = 1         # subjectは1~109いる
-runs = [6, 10, 14]  # motor imagery: hands vs feet (https://www.martinos.org/mne/stable/generated/mne.datasets.eegbci.load_data.html?highlight=load_data)
-
-raw_fnames = eegbci.load_data(subject, runs)
-raw_files = [read_raw_edf(f, preload=True, stim_channel='auto') for f in raw_fnames]
-raw = concatenate_raws(raw_files)
-
-# strip channel names of "." characters
-raw.rename_channels(lambda x: x.strip('.'))     # ['Fc5.', 'Fc3.', ... ] -> ['Fc5', 'Fc3', ... ]
-
-# Apply band-pass filter (raw.infoにて，lowpass 80.0 -> 30.0Hz ,  highpass 0.0 -> 7.0Hz)
+info = mne.create_info(ch_names=ch_names, sfreq=512, ch_types=ch_types)
+raw = mne.io.RawArray(data[1:], info)
 raw.filter(7., 30., fir_design='firwin', skip_by_annotation='edge')
+# raw.plot(n_channels=len(ch_names), scalings='auto', title='Data from arrays', show=True, block=True)
 
-events = find_events(raw, shortest_event=0, stim_channel='STI 014')     # stim:自己刺激？
+events = mne.find_events(raw, stim_channel='STIM')
+picks = mne.pick_types(raw.info, meg=False, eeg=True, stim=False, eog=False, exclude='bads')
 
-# 各イベント(1~3)がどの時間に行うかプロット
-# mne.viz.plot_events(events, raw.info['sfreq'], raw.first_samp)
-
-# picks=[0, 1, 2, ... , 63] 全チャンネルの配列の中からEEGのチャンネルのindexを取得
-picks = pick_types(raw.info, meg=False, eeg=True, stim=False, eog=False, exclude='bads')
-
-# エポックを読み込む（訓練は1〜2秒間のみ実行される）テストは実行中の分類器で行われる
-# tmin, tmax : イベントの開始・終了時間．それぞれデフォは -0.2, 0.5 
-# proj=True  : SSP投影ベクトルを適用する（？）
+event_id = dict(right=1, left=2)
 epochs = Epochs(raw, events, event_id, tmin=-1., tmax=4., proj=True, picks=picks, baseline=None, preload=True)
-epochs_train = epochs.copy().crop(tmin=1., tmax=2.)
-labels = epochs.events[:, -1] - 2   # イベントのラベルが[2, 3]なのを[0, 1]に変換
+# epochs.plot(picks=picks, scalings='auto', show=True, block=True)
 
-# # -----------------------LDAによる分類----------------------------
+####################################
+
+epochs_train = epochs.copy().crop(tmin=1., tmax=2.)
+labels = epochs.events[:, -1] - 1
+
+# -----------------------LDAによる分類----------------------------
 
 # モンテカルロ相互検証ジェネレータを定義する（分散を減らす）：
 scores = []
@@ -64,13 +49,6 @@ cv_split = cv.split(epochs_data_train)
 # 分類器を組み立てる
 lda = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
 csp = mne.decoding.CSP(n_components=4, reg=None, log=True, norm_trace=False)
-
-# csp.fit_transform(epochs_data, labels)
-# e = epochs_data_train[0][2]
-# print(e)
-# print(len(e))
-# print(csp.transform(epochs_data_train)[0])
-# print(len(csp.transform(epochs_data_train)[0]))
 
 # cross_val_score関数（交差検証法の精度を出す関数）でscikit-learn Pipelineを使用する
 clf = sklearn.pipeline.Pipeline([('CSP', csp), ('LDA', lda)])
@@ -85,9 +63,6 @@ print("Classification accuracy: %f / Chance level: %f" % (np.mean(scores), class
 csp.fit_transform(epochs_data, labels)
 layout = read_layout('EEG1005')
 # csp.plot_patterns(epochs.info, layout=layout, ch_type='eeg', units='Patterns (AU)', size=1.5)
-
-# cspのフィルタ取得
-# print(csp.filters_)
 
 # ---------------------------時間の経過とともにパフォーマンスを調べる------------------------------
 
@@ -111,9 +86,6 @@ for train_idx, test_idx in cv_split:
     score_this_window = []
     for n in w_start:
         X_test = csp.transform(epochs_data[test_idx][:, :, n:(n + w_length)])
-        # print(X_test)
-        # print(y_test)
-        # print(lda.predict(X_test))
         score_this_window.append(lda.score(X_test, y_test))
     scores_windows.append(score_this_window)
 
