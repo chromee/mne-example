@@ -15,3 +15,4 @@ for path in root.iterdir():
     # new_name = path.name.replace(".mat.csv_cuntom.csv_fix", "")
     # new_path = root.joinpath(new_name)
     # path.rename(new_path)
+    print("a")
