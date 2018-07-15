@@ -15,6 +15,8 @@ from mne.io import concatenate_raws, read_raw_edf
 from mne.datasets import eegbci
 import mne.decoding
 
+mne.set_log_level('WARNING')
+
 def culc_by_csp_and_lda(path):
     data = np.loadtxt(path, delimiter=",", skiprows=1).T
     ch_types = ["eeg" for i in range(16)] + ["stim"]
@@ -102,10 +104,10 @@ def culc_by_csp_and_lda(path):
     plt.savefig(str(path) + "_svm.png")
     # plt.show()
 
-root = Path("C:/Users/dk334/workspace/mne-example/data")
+root = Path("./data/csv")
 for path in root.iterdir():
     if path.is_file():
         culc_by_csp_and_lda(path)
 
-# path = Path("C:/Users/dk334/workspace/mne-example/data/afujii_MIK_20_07_2017_17_00_48_0000.csv")
+# path = Path("./data/csv/afujii_MIK_20_07_2017_17_00_48_0000.csv")
 # culc_by_csp_and_lda(path)
