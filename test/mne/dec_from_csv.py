@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
 
@@ -12,8 +11,6 @@ import mne
 from mne import Epochs, pick_types, find_events
 from mne.channels import read_layout
 from mne.io import concatenate_raws, read_raw_edf
-from mne.datasets import eegbci
-import mne.decoding
 
 mne.set_log_level('WARNING')
 
@@ -49,7 +46,7 @@ def culc_by_csp_and_lda(path):
 
     # 分類器を組み立てる
     lda = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
-    lda = svm.SVC()
+    # lda = svm.SVC()
     csp = mne.decoding.CSP(n_components=4, reg=None, log=True, norm_trace=False)
 
     # cross_val_score関数（交差検証法の精度を出す関数）でscikit-learn Pipelineを使用する
@@ -101,13 +98,13 @@ def culc_by_csp_and_lda(path):
     plt.ylabel('classification accuracy')
     plt.title('Classification score over time :' + path.name)
     plt.legend(loc='lower right')
-    plt.savefig(str(path) + "_svm.png")
-    # plt.show()
+    # plt.savefig(str(path) + "_svm.png")
+    plt.show()
 
-root = Path("./data/csv")
-for path in root.iterdir():
-    if path.is_file():
-        culc_by_csp_and_lda(path)
+# root = Path("./data/csv")
+# for path in root.iterdir():
+#     if path.is_file():
+#         culc_by_csp_and_lda(path)
 
-# path = Path("./data/csv/afujii_MIK_20_07_2017_17_00_48_0000.csv")
-# culc_by_csp_and_lda(path)
+path = Path("./data/csv/afujii_MIK_20_07_2017_17_00_48_0000.csv")
+culc_by_csp_and_lda(path)
