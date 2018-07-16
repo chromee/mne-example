@@ -30,7 +30,7 @@ def culc_by_csp_and_lda(path, csp_path, lda_path):
 #     if path.is_file():
 #         culc_by_csp_and_lda(path)
 
-path = Path("./data/csv/jtanaka_MIK_14_05_2016_13_33_15_0000.csv")
-cap_path = "./data/models/csp_eeg_python36_jtanaka_MIK_14_05_2016_13_33_15_0000.csv_20180715.pickle"
-lda_path = "./data/models/lda_eeg_python36_jtanaka_MIK_14_05_2016_13_33_15_0000.csv_20180715.pickle"
+path = Path("./data/csv/yotsuka_MIK_21_07_2017_16_06_45_0000.csv")
+cap_path = "./data/models/csp_eeg_python36_yotsuka_MIK_21_07_2017_16_06_45_0000.csv_20180715.pickle"
+lda_path = "./data/models/lda_eeg_python36_yotsuka_MIK_21_07_2017_16_06_45_0000.csv_20180715.pickle"
 culc_by_csp_and_lda(path, cap_path, lda_path)

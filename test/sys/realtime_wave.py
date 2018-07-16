@@ -19,12 +19,12 @@ y = data[1][0:time_range*sfreq]
 lines, = ax.plot(x, y)
 
 for i in range(len(data[0])):
-  # for ch in data:
-  # print(data[1][i])
-  x += interval
-  y = data[1][i:i+time_range*sfreq]
-  lines.set_data(x, y)
-  ax.set_xlim((x.min(), x.max()))
-  ax.set_ylim((y.min(), y.max()))
-  plt.pause(interval)
+    # for ch in data:
+    # print(data[1][i])
+    x += interval
+    y = data[1][i:i+time_range*sfreq]
+    lines.set_data(x, y)
+    ax.set_xlim((x.min(), x.max()))
+    ax.set_ylim((y.min(), y.max()))
+    plt.pause(interval)
 
