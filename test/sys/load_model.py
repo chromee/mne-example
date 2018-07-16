@@ -23,14 +23,16 @@ def culc_by_csp_and_lda(path, csp_path, lda_path):
 
     X_test = csp.transform(epochs_data)
     score = lda.score(X_test, labels)
-    print(score)
+    print(path, score)
 
-# root = Path("./data/csv")
-# for path in root.iterdir():
-#     if path.is_file():
-#         culc_by_csp_and_lda(path)
+root = Path("./data/csv")
+for path in root.iterdir():
+    if path.is_file():
+        cap_path = "./data/models/csp_eeg_python36_" + str(path.name) + "_20180715.pickle"
+        lda_path = "./data/models/lda_eeg_python36_" + str(path.name) + "_20180715.pickle"
+        culc_by_csp_and_lda(path, cap_path, lda_path)
 
-path = Path("./data/csv/yotsuka_MIK_21_07_2017_16_06_45_0000.csv")
-cap_path = "./data/models/csp_eeg_python36_yotsuka_MIK_21_07_2017_16_06_45_0000.csv_20180715.pickle"
-lda_path = "./data/models/lda_eeg_python36_yotsuka_MIK_21_07_2017_16_06_45_0000.csv_20180715.pickle"
-culc_by_csp_and_lda(path, cap_path, lda_path)
+# path = Path("./data/csv/yotsuka_MIK_21_07_2017_16_06_45_0000.csv")
+# cap_path = "./data/models/csp_eeg_python36_yotsuka_MIK_21_07_2017_16_06_45_0000.csv_20180715.pickle"
+# lda_path = "./data/models/lda_eeg_python36_yotsuka_MIK_21_07_2017_16_06_45_0000.csv_20180715.pickle"
+# culc_by_csp_and_lda(path, cap_path, lda_path)
