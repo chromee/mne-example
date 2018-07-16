@@ -1,3 +1,5 @@
+# EEGの時系列データをリアルタイムにとってるっぽくmatplotlibで表示するプログラム
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt

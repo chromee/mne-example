@@ -7,31 +7,18 @@ import sklearn.discriminant_analysis
 from sklearn import svm
 
 import mne
-from mne import Epochs, pick_types, find_events
-
-mne.set_log_level('WARNING')
+import convert_mne_from_csv
 
 def save_model(path):
-    data = np.loadtxt(path, delimiter=",", skiprows=1).T
-    ch_types = ["eeg" for i in range(16)] + ["stim"]
-    ch_names = ["Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "T3", "C3", "Cz", "C4", "T4", "T5", "P3", "Pz", "P4", "STIM"]
-
-    info = mne.create_info(ch_names=ch_names, sfreq=512, ch_types=ch_types)
-    raw = mne.io.RawArray(data[1:], info)
-    raw.filter(7., 30., fir_design='firwin', skip_by_annotation='edge')
-
-    events = mne.find_events(raw, stim_channel='STIM')
-    picks = mne.pick_types(raw.info, meg=False, eeg=True, stim=False, eog=False, exclude='bads')
-
-    event_id = dict(right=1, left=2)
-    epochs = Epochs(raw, events, event_id, tmin=-1., tmax=4., proj=True, picks=picks, baseline=None, preload=True)
+    epochs = convert_mne_from_csv.epochs_from_csv(path)
+    epochs_data = epochs.get_data()
     labels = epochs.events[:, -1] - 1
 
     # 分類器を組み立てる
     lda = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
     csp = mne.decoding.CSP(n_components=4, reg=None, log=True, norm_trace=False)
 
-    X_train = csp.fit_transform(epochs.get_data(), labels)
+    X_train = csp.fit_transform(epochs_data, labels)
     lda.fit(X_train, labels)
 
     tail = "_eeg_python36_" + path.name + "_" + dt.now().strftime('%Y%m%d') + ".pickle"
@@ -43,10 +30,10 @@ def save_model(path):
     with open(file_name, mode='wb') as lda_file:
         pickle.dump(lda, lda_file)
 
-root = Path("./data/csv")
-for path in root.iterdir():
-    if path.is_file():
-        save_model(path)
+# root = Path("./data/csv")
+# for path in root.iterdir():
+#     if path.is_file():
+#         save_model(path)
 
-# path = Path("./data/csv/afujii_MIK_20_07_2017_17_00_48_0000.csv")
-# save_model(path)
+path = Path("./data/csv/afujii_MIK_20_07_2017_17_00_48_0000.csv")
+save_model(path)
