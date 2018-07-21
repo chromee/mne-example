@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import numpy as np
 # a=[1,2,3] + [4]
 # print(a)
 
@@ -14,4 +14,7 @@ from pathlib import Path
 # print(a[:])
 # print(a[:][:])
 
-print(1, 2)
+# print(1, 2)
+
+s = np.arange(0, 10, 0.2)
+print(s)

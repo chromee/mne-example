@@ -74,12 +74,14 @@ def culc_by_csp_and_lda(path):
     for train_idx, test_idx in cv_split:
         y_train, y_test = labels[train_idx], labels[test_idx]
 
+        # ----------- train---------------
         X_train = csp.fit_transform(epochs_data_train[train_idx], y_train)    # データとラベルからフィルタを変形させる
         X_test = csp.transform(epochs_data_train[test_idx])                   # フィルタからデータを変形させる
 
         # fit classifier
         lda.fit(X_train, y_train)
 
+        # ------------test---------------
         # running classifier: test classifier on sliding window
         score_this_window = []
         for n in w_start:
@@ -89,7 +91,7 @@ def culc_by_csp_and_lda(path):
 
     # Plot scores over time
     w_times = (w_start + w_length / 2.) / sfreq + epochs.tmin
-
+    
     plt.figure()
     plt.plot(w_times, np.mean(scores_windows, 0), label='Score')
     plt.axvline(0, linestyle='--', color='k', label='Onset')

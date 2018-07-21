@@ -15,25 +15,33 @@ def save_model(path):
     labels = epochs.events[:, -1] - 1
 
     # 分類器を組み立てる
-    lda = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
     csp = mne.decoding.CSP(n_components=4, reg=None, log=True, norm_trace=False)
+    lda = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
+    _svm = svm.SVC()
 
     X_train = csp.fit_transform(epochs_data, labels)
     lda.fit(X_train, labels)
+    _svm.fit(X_train, labels)
 
-    tail = "_eeg_python36_" + path.name + "_" + dt.now().strftime('%Y%m%d') + ".pickle"
-    file_name = "data/models/csp" + tail
-    with open(file_name, mode='wb') as csp_file:
+    file_name = "csp_" + path.name + "_python36_" + dt.now().strftime('%Y%m%d') + ".pickle"
+    file_path = "data/models/csp/" + file_name
+    with open(file_path, mode='wb') as csp_file:
       pickle.dump(csp, csp_file)
-
-    file_name = "data/models/lda" + tail
-    with open(file_name, mode='wb') as lda_file:
+    
+    file_name = "lda_" + path.name + "_python36_" + dt.now().strftime('%Y%m%d') + ".pickle"
+    file_path = "data/models/lda/" + file_name
+    with open(file_path, mode='wb') as lda_file:
         pickle.dump(lda, lda_file)
+
+    file_name = "svm_" + path.name + "_python36_" + dt.now().strftime('%Y%m%d') + ".pickle"
+    file_path = "data/models/svm/" + file_name
+    with open(file_path, mode='wb') as svm_file:
+        pickle.dump(_svm, svm_file)
 
 # root = Path("./data/csv")
 # for path in root.iterdir():
 #     if path.is_file():
 #         save_model(path)
 
-path = Path("./data/csv/afujii_MIK_20_07_2017_17_00_48_0000.csv")
+path = Path("./data/csv/jtanaka_MIK_14_05_2016_13_33_15_0000.csv")
 save_model(path)
