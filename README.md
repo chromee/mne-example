@@ -3,6 +3,9 @@
 ## Requirements
 
 - [Anaconda3.5.2.0 (Python 3.6.5)](https://www.anaconda.com/download/)
+- mne
+- pycnbi
+- pylsl
 ```
 pip install -U mne
 ```
