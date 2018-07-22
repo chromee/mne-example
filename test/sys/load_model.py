@@ -28,11 +28,11 @@ def culc_by_csp_and_lda(path, csp_path, lda_path):
 root = Path("./data/csv")
 for path in root.iterdir():
     if path.is_file():
-        cap_path = "./data/models/csp/csp_" + str(path.name) + "_python36_20180717.pickle"
-        lda_path = "./data/models/lda/lda_" + str(path.name) + "_python36_20180717.pickle"
+        cap_path = "./data/models/csp/csp_" + str(path.name) + ".pickle"
+        lda_path = "./data/models/lda/lda_" + str(path.name) + ".pickle"
         culc_by_csp_and_lda(path, cap_path, lda_path)
 
-path = Path("./data/csv/jtanaka_MIK_14_05_2016_13_33_15_0000.csv")
-cap_path = "./data/models/csp_eeg_python36_jtanaka_MIK_14_05_2016_13_33_15_0000.csv_20180715.pickle"
-lda_path = "./data/models/lda_eeg_python36_jtanaka_MIK_14_05_2016_13_33_15_0000.csv_20180715.pickle"
-culc_by_csp_and_lda(path, cap_path, lda_path)
+# path = Path("./data/csv/jtanaka_MIK_14_05_2016_13_33_15_0000.csv")
+# cap_path = "./data/models/csp_jtanaka_MIK_14_05_2016_13_33_15_0000.csv.pickle"
+# lda_path = "./data/models/lda_jtanaka_MIK_14_05_2016_13_33_15_0000.csv.pickle"
+# culc_by_csp_and_lda(path, cap_path, lda_path)
