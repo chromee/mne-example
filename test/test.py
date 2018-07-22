@@ -16,5 +16,11 @@ import numpy as np
 
 # print(1, 2)
 
-s = np.arange(0, 10, 0.2)
-print(s)
+# s = np.arange(0, 10, 0.2)
+# print(s)
+
+sw = np.zeros((5,5))
+# sw = sw.reshape(1,1)
+print(sw[1:3,:0])
+# sw += np.array([1,2])
+# print(sw)
