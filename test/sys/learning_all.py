@@ -30,7 +30,7 @@ for path in root.iterdir():
         data = tmp
 
 ch_types = ["eeg" for i in range(16)] + ["stim"]
-ch_names = ["Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "T3", "C3", "Cz", "C4", "T4", "T5", "P3", "Pz", "P4", "STIM"]
+ch_names = ["Fp1", "Fp2", "F7", "F3", "F4", "F8", "T3", "C3", "Cz", "C4", "T4", "P3", "Pz", "P4", "O1", "O2", "STIM"]
 
 info = mne.create_info(ch_names=ch_names, sfreq=512, ch_types=ch_types)
 raw = mne.io.RawArray(data[1:], info)
