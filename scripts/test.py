@@ -19,8 +19,13 @@ import numpy as np
 # s = np.arange(0, 10, 0.2)
 # print(s)
 
-sw = np.zeros((5,5))
+# sw = np.zeros((5,5))
 # sw = sw.reshape(1,1)
-print(sw[1:3,:0])
+# print(sw[1:3,:0])
 # sw += np.array([1,2])
 # print(sw)
+
+l = list(range(1,17))
+l.pop(0)
+l = [0] * 17
+print(l)
