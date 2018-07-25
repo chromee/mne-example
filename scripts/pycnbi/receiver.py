@@ -58,7 +58,7 @@ while True:
     # else:
     #     datatxt = qc.list2string(window[CH_INDEX, TIME_INDEX], '%-15.6f')
     #     print('[%.3f]' % tslist[TIME_INDEX] + ' data: %s' % datatxt)
-    print(window[1])
+    # print(window[1])
 
     x += interval
     y.pop(0)

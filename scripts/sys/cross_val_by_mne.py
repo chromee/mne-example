@@ -45,7 +45,7 @@ def culc_by_csp_and_lda(path):
 
     # 分類器を組み立てる
     lda = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
-    # lda = svm.SVC()
+    lda = svm.SVC()
     csp = mne.decoding.CSP(n_components=4, reg=None, log=True, norm_trace=False)
 
     # cross_val_score関数（交差検証法の精度を出す関数）でscikit-learn Pipelineを使用する
@@ -56,6 +56,7 @@ def culc_by_csp_and_lda(path):
     class_balance = np.mean(labels == labels[0])    # 0と1のラベルの数の比率
     class_balance = max(class_balance, 1. - class_balance)
     print("Classification accuracy: %f / Chance level: %f" % (np.mean(scores), class_balance))
+    return
 
     # # 視覚化のための完全なデータで推定されたCSPパターンのプロット
     # csp.fit_transform(epochs_data, labels)
@@ -102,10 +103,10 @@ def culc_by_csp_and_lda(path):
     # plt.savefig(str(path) + "_svm.png")
     plt.show()
 
-# root = Path("./data/csv")
-# for path in root.iterdir():
-#     if path.is_file():
-#         culc_by_csp_and_lda(path)
+root = Path("./data/csv/judo")
+for path in root.iterdir():
+    if path.is_file():
+        culc_by_csp_and_lda(path)
 
-path = Path("./data/csv/afujii_MIK_20_07_2017_17_00_48_0000.csv")
-culc_by_csp_and_lda(path)
+# path = Path("./data/csv/afujii_MIK_20_07_2017_17_00_48_0000.csv")
+# culc_by_csp_and_lda(path)

@@ -7,19 +7,19 @@ from time import sleep
 import mne
 import convert_mne_from_csv
 
-path = "./data/csv/jtanaka_MIK_14_05_2016_13_33_15_0000.csv"
+path = "./data/csv/misl/jtanaka_MIK_14_05_2016_13_33_15_0000.csv"
 data = np.loadtxt(path, delimiter=",", skiprows=1).T
 
 sfreq = 512
 interval = 1. / sfreq
 
-with open("./data/models/csp/csp_jtanaka_MIK_14_05_2016_13_33_15_0000.csv.pickle", 'rb') as pickle_file:
+with open("./data/models/misl/csp/csp_jtanaka_MIK_14_05_2016_13_33_15_0000.csv.pickle", 'rb') as pickle_file:
     csp = pickle.load(pickle_file)
-with open("./data/models/svm/svm_jtanaka_MIK_14_05_2016_13_33_15_0000.csv.pickle", 'rb') as pickle_file:
+with open("./data/models/misl/svm/svm_jtanaka_MIK_14_05_2016_13_33_15_0000.csv.pickle", 'rb') as pickle_file:
     lda = pickle.load(pickle_file)
 
 w_length = int(sfreq * 0.5)
-w_length = 2561
+# w_length = 2561
 w_step = int(sfreq * 0.1)
 
 step = 0
@@ -33,10 +33,10 @@ for i in range(len(data[0])):
         window = np.array([raw[:, -w_length:]])
         X_test = csp.transform(window)
         label = lda.predict(X_test)
-        # print(i, label)
-        if label == data[17][i]: score += 1
-        count += 1
+        print(i, label)
+        # if label == data[17][i]: score += 1
+        # count += 1
         step = 0
-print(score/count)
+# print(score/count)
     # sleep(interval)
 
