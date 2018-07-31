@@ -33,10 +33,10 @@ for i in range(len(data[0])):
         window = np.array([raw[:, -w_length:]])
         X_test = csp.transform(window)
         label = lda.predict(X_test)
+        step = 0
         print(i, label)
         # if label == data[17][i]: score += 1
         # count += 1
-        step = 0
-# print(score/count)
     # sleep(interval)
+# print(score/count)
 
