@@ -3,13 +3,16 @@ from scipy import special
 import math
 import mne
 import pylab as plt
-import SurfaceLaplacian.surface_laplacian
 
-data = np.genfromtxt('mne/SurfaceLaplacian/example data.csv', delimiter=',') # load the data
+import sys
+sys.path.append("lib/SurfaceLaplacian/")
+from surface_laplacian import surface_laplacian
+
+data = np.genfromtxt('lib/SurfaceLaplacian/example data.csv', delimiter=',') # load the data
 data = data.reshape((64, 640, 99), order='F') # re-arrange data into a 3d array
 data = np.rollaxis(data, 2) # swap data's shape
 data = (data)*1e-6 # re-scale data
-coordinates = np.genfromtxt('mne/SurfaceLaplacian/coordinates.csv', delimiter=',') # get electrode positions
+coordinates = np.genfromtxt('lib/SurfaceLaplacian/coordinates.csv', delimiter=',') # get electrode positions
 
 ch_names = ['Fp1','AF7','AF3','F1','F3','F5','F7','FT7','FC5','FC3','FC1','C1','C3','C5','T7','TP7','CP5','CP3','CP1',
             'P1','P3','P5','P7','P9','PO7','PO3','O1','Iz','Oz','POz','Pz','CPz','Fpz','Fp2','AF8','AF4','AFz','Fz',
@@ -29,7 +32,7 @@ info = mne.create_info(ch_names=ch_names, sfreq=sfreq, ch_types='eeg', montage=m
 epochs = mne.EpochsArray(data=data, info=info, tmin=-1) # make Epochs onject
 
 
-surf_lap, surf_orig = SurfaceLaplacian.surface_laplacian.surface_laplacian(epochs=epochs, m=4, leg_order=50, smoothing=1e-5, montage=montage)
+surf_lap, surf_orig = surface_laplacian(epochs=epochs, m=4, leg_order=50, smoothing=1e-5, montage=montage)
 
 bf_erp = surf_orig.average()
 at_erp = surf_lap.average()
