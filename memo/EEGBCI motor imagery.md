@@ -37,4 +37,4 @@ https://www.physionet.org/pn4/eegmmidb/
 ## モンタージュ
 EEGは、以下に示すように、国際10-10システム（電極Nz、F9、F10、FT9、FT10、A1、A2、TP9、TP10、P9、およびP10を除く）に従って64個の電極から記録した 図）。 各電極名の下の数字は、それらがレコードに現れる順序を示す。 レコードの信号には0〜63の番号が付けられ、図の番号には1〜64の番号が付いています。
 
-![EEG](https://www.physionet.org/pn4/eegmmidb/64_channel_sharbrough-old.png)
+![EEG](https://www.physionet.org/pn4/eegmmidb/64_channel_sharbrough.png)
