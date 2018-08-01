@@ -14,20 +14,29 @@ from statistics import mean
 
 mne.set_log_level('WARNING')
 
+
 def get_score(subject, runs, event_id):
     raw_fnames = eegbci.load_data(subject, runs)
-    raw_files = [read_raw_edf(f, preload=True, stim_channel='auto') for f in raw_fnames]
+    raw_files = [read_raw_edf(f, preload=True, stim_channel='auto')
+                 for f in raw_fnames]
     raw = concatenate_raws(raw_files)
 
     raw.rename_channels(lambda x: x.strip('.'))
+
+    # T3 -> T7, T4 -> T8
+    ch_names = ["Fp1", "Fp2", "F7", "F3", "F4", "F8", "T7", "C3",
+                "Cz", "C4", "T8", "P3", "Pz", "P4", "O1", "O2", "STI 014"]
+    raw.pick_channels(ch_names)
 
     raw.filter(7., 30., fir_design='firwin', skip_by_annotation='edge')
 
     events = find_events(raw, shortest_event=0, stim_channel='STI 014')
 
-    picks = pick_types(raw.info, meg=False, eeg=True, stim=False, eog=False, exclude='bads')
+    picks = pick_types(raw.info, meg=False, eeg=True,
+                       stim=False, eog=False, exclude='bads')
 
-    epochs = Epochs(raw, events, event_id, tmin=-1., tmax=4., proj=True, picks=picks, baseline=None, preload=True)
+    epochs = Epochs(raw, events, event_id, tmin=-1., tmax=4.,
+                    proj=True, picks=picks, baseline=None, preload=True)
     epochs_train = epochs.copy().crop(tmin=1., tmax=2.)
     labels = epochs.events[:, -1] - 2
 
@@ -36,7 +45,8 @@ def get_score(subject, runs, event_id):
     cv = ShuffleSplit(10, test_size=0.2, random_state=42)
 
     lda = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
-    csp = mne.decoding.CSP(n_components=4, reg=None, log=True, norm_trace=False)
+    csp = mne.decoding.CSP(n_components=4, reg=None,
+                           log=True, norm_trace=False)
 
     clf = sklearn.pipeline.Pipeline([('CSP', csp), ('LDA', lda)])
     scores = cross_val_score(clf, epochs_data_train, labels, cv=cv, n_jobs=1)
