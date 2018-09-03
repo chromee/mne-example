@@ -8,7 +8,6 @@ from sklearn import svm
 
 import mne
 from mne import Epochs, pick_types, find_events
-import convert_mne_from_csv
 
 lda = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
 csp = mne.decoding.CSP(n_components=4, reg=None, log=True, norm_trace=False)
@@ -57,7 +56,7 @@ with open(file_name, mode='wb') as lda_file:
 
 ########################################
 
-def load_model(path):
+def get_score_from_learned_model(path):
     epochs = convert_mne_from_csv.epochs_from_csv(path)
     epochs_data = epochs.get_data()
     labels = epochs.events[:, -1] - 1
@@ -76,5 +75,5 @@ def load_model(path):
 root = Path("./data/csv")
 for path in root.iterdir():
     if path.is_file():
-        load_model(path)
+        get_score_from_learned_model(path)
 

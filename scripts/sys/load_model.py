@@ -9,30 +9,27 @@ import sklearn.discriminant_analysis
 from sklearn.model_selection import ShuffleSplit, cross_val_score
 from sklearn import svm
 
-import convert_mne_from_csv
+import os, sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from lib.mne_wrapper import get_epochs
 
-def culc_by_csp_and_lda(path, csp_path, lda_path):
-    epochs = convert_mne_from_csv.epochs_from_csv(path)
+def culc_by_csp_and_lda(subject):
+    epochs = get_epochs(subject)
     epochs_data = epochs.get_data()
     labels = epochs.events[:, -1] - 1
 
+    csp_path = "./data/models/csp/csp_subject" + str(subject) + ".pickle"
     with open(csp_path, 'rb') as pickle_file:
         csp = pickle.load(pickle_file)
+    lda_path = "./data/models/lda/lda_subject" + str(subject) + ".pickle"
     with open(lda_path, 'rb') as pickle_file:
         lda = pickle.load(pickle_file)
     X_test = csp.transform(epochs_data)
-    print(X_test.shape)
     score = lda.score(X_test, labels)
-    print(path, score)
+    print("subject"+str(subject), score)
 
-root = Path("./data/csv")
-for path in root.iterdir():
-    if path.is_file():
-        cap_path = "./data/models/csp/csp_" + str(path.name) + ".pickle"
-        lda_path = "./data/models/lda/lda_" + str(path.name) + ".pickle"
-        culc_by_csp_and_lda(path, cap_path, lda_path)
 
-# path = Path("./data/csv/jtanaka_MIK_14_05_2016_13_33_15_0000.csv")
-# cap_path = "./data/models/csp_jtanaka_MIK_14_05_2016_13_33_15_0000.csv.pickle"
-# lda_path = "./data/models/lda_jtanaka_MIK_14_05_2016_13_33_15_0000.csv.pickle"
-# culc_by_csp_and_lda(path, cap_path, lda_path)
+# culc_by_csp_and_lda(subject=1)
+
+for i in range(1, 110):
+    culc_by_csp_and_lda(subject=i)
