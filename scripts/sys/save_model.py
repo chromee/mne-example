@@ -13,10 +13,12 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from mylib.mne_wrapper import get_epochs
 
 
-def save_model(subject, runs, event_id):
-    epochs = get_epochs(subject, runs, event_id)
+def save_model(subject):
+    epochs = get_epochs(subject)
     epochs_data = epochs.get_data()
-    labels = epochs.events[:, -1] - 1
+    labels = epochs.events[:, -1] - 2
+    print(epochs_data.shape)
+    exit()
 
     csp = mne.decoding.CSP(n_components=4, reg=None,
                            log=True, norm_trace=False)
@@ -47,5 +49,6 @@ save_model(subject=1)
 
 # for i in range(1, 110):
 #     save_model(subject=i)
+#     print(i)
 
 print("ended")

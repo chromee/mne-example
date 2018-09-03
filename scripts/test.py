@@ -25,7 +25,18 @@ import numpy as np
 # sw += np.array([1,2])
 # print(sw)
 
-l = list(range(1,17))
-l.pop(0)
-l = [0] * 17
-print(l)
+# l = list(range(1, 17))
+# l.pop(0)
+# l = [0] * 17
+# print(l)
+
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from mylib.mne_wrapper import get_epochs
+
+
+epochs = get_epochs(1)
+epochs_data = epochs.get_data()
+labels = epochs.events[:, -1] - 2
+print(labels)
