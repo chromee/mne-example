@@ -1,13 +1,15 @@
 # EEGの時系列データをリアルタイムにとってるっぽくmatplotlibで表示するプログラム
 
-import numpy as np
+import os, sys, numpy as np
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from lib.mne_wrapper import get_raw
 import pandas as pd
 import matplotlib.pyplot as plt
 from time import sleep
 
 
-path = "./data/afujii_MIK_20_07_2017_17_00_48_0000.csv"
-data = np.loadtxt(path, delimiter=",", skiprows=1).T
+raw = get_raw(subject=1, runs=[6, 10, 14], event_id=dict(hands=2, feet=3))
+data = raw.get_data()
 
 sfreq = 512
 interval = 1. / sfreq
