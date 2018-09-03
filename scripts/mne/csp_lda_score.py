@@ -1,42 +1,19 @@
-import numpy as np
+import os, sys, numpy as np
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from lib.mne_wrapper import get_epochs
 
 import sklearn.pipeline
 import sklearn.discriminant_analysis
 from sklearn.model_selection import ShuffleSplit, cross_val_score
 
-from mne import Epochs, pick_types, find_events
-from mne.channels import read_layout
-from mne.io import concatenate_raws, read_raw_edf
-from mne.datasets import eegbci
 import mne.decoding
-
 from statistics import mean
 
 mne.set_log_level('WARNING')
 
 
 def get_score(subject, runs, event_id):
-    raw_fnames = eegbci.load_data(subject, runs)
-    raw_files = [read_raw_edf(f, preload=True, stim_channel='auto')
-                 for f in raw_fnames]
-    raw = concatenate_raws(raw_files)
-
-    raw.rename_channels(lambda x: x.strip('.'))
-
-    # T3 -> T7, T4 -> T8
-    ch_names = ["Fp1", "Fp2", "F7", "F3", "F4", "F8", "T7", "C3",
-                "Cz", "C4", "T8", "P3", "Pz", "P4", "O1", "O2", "STI 014"]
-    raw.pick_channels(ch_names)
-
-    raw.filter(7., 30., fir_design='firwin', skip_by_annotation='edge')
-
-    events = find_events(raw, shortest_event=0, stim_channel='STI 014')
-
-    picks = pick_types(raw.info, meg=False, eeg=True,
-                       stim=False, eog=False, exclude='bads')
-
-    epochs = Epochs(raw, events, event_id, tmin=-1., tmax=4.,
-                    proj=True, picks=picks, baseline=None, preload=True)
+    epochs = get_epochs(subject, runs, event_id)
     epochs_train = epochs.copy().crop(tmin=1., tmax=2.)
     labels = epochs.events[:, -1] - 2
 
@@ -46,9 +23,6 @@ def get_score(subject, runs, event_id):
     lda = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
     csp = mne.decoding.CSP(n_components=4, reg=None,
                            log=True, norm_trace=False)
-
-    clf = sklearn.pipeline.Pipeline([('CSP', csp), ('LDA', lda)])
-
     cv = ShuffleSplit(10, test_size=0.2, random_state=42)
 
     self_scores = []
