@@ -9,9 +9,11 @@ import sklearn.discriminant_analysis
 from sklearn.model_selection import ShuffleSplit, cross_val_score
 from sklearn import svm
 
-import os, sys
+import os
+import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from lib.mne_wrapper import get_epochs
+from mylib.mne_wrapper import get_epochs
+
 
 def culc_by_csp_and_lda(subject):
     epochs = get_epochs(subject)
@@ -29,7 +31,7 @@ def culc_by_csp_and_lda(subject):
     print("subject"+str(subject), score)
 
 
-# culc_by_csp_and_lda(subject=1)
+culc_by_csp_and_lda(subject=1)
 
-for i in range(1, 110):
-    culc_by_csp_and_lda(subject=i)
+# for i in range(1, 110):
+#     culc_by_csp_and_lda(subject=i)

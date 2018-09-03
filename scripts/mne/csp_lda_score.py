@@ -1,6 +1,8 @@
-import os, sys, numpy as np
+import os
+import sys
+import numpy as np
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from lib.mne_wrapper import get_epochs
+from mylib.mne_wrapper import get_epochs
 
 import sklearn.pipeline
 import sklearn.discriminant_analysis

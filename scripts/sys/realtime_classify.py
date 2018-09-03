@@ -5,17 +5,21 @@ import matplotlib.pyplot as plt
 from time import sleep
 
 import mne
-import convert_mne_from_csv
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from mylib.mne_wrapper import get_raw
 
-path = "./data/csv/misl/jtanaka_MIK_14_05_2016_13_33_15_0000.csv"
-data = np.loadtxt(path, delimiter=",", skiprows=1).T
-
+subject = 1
 sfreq = 512
 interval = 1. / sfreq
 
-with open("./data/models/misl/csp/csp_jtanaka_MIK_14_05_2016_13_33_15_0000.csv.pickle", 'rb') as pickle_file:
+raw = get_raw(subject)
+data = raw.get_data()
+
+with open("./data/models/csp/csp_subject" + str(subject) + ".pickle", 'rb') as pickle_file:
     csp = pickle.load(pickle_file)
-with open("./data/models/misl/svm/svm_jtanaka_MIK_14_05_2016_13_33_15_0000.csv.pickle", 'rb') as pickle_file:
+with open("./data/models/csp/csp_subject" + str(subject) + ".pickle", 'rb') as pickle_file:
     lda = pickle.load(pickle_file)
 
 w_length = int(sfreq * 0.5)
@@ -27,7 +31,7 @@ count = 0
 score = 0
 
 for i in range(len(data[0])):
-    raw = data[1:17,:i+1]
+    raw = data[1:17, :i+1]
     step += 1
     if i > w_length and step > w_step:
         window = np.array([raw[:, -w_length:]])
@@ -39,4 +43,3 @@ for i in range(len(data[0])):
         # count += 1
     # sleep(interval)
 # print(score/count)
-

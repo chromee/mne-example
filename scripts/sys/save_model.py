@@ -7,16 +7,19 @@ import sklearn.discriminant_analysis
 from sklearn import svm
 
 import mne
-import os, sys
+import os
+import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from lib.mne_wrapper import get_epochs
+from mylib.mne_wrapper import get_epochs
+
 
 def save_model(subject, runs, event_id):
     epochs = get_epochs(subject, runs, event_id)
     epochs_data = epochs.get_data()
     labels = epochs.events[:, -1] - 1
 
-    csp = mne.decoding.CSP(n_components=4, reg=None, log=True, norm_trace=False)
+    csp = mne.decoding.CSP(n_components=4, reg=None,
+                           log=True, norm_trace=False)
     lda = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
     _svm = svm.SVC()
 
@@ -27,8 +30,8 @@ def save_model(subject, runs, event_id):
     file_name = "csp_subject" + str(subject) + ".pickle"
     file_path = "data/models/csp/" + file_name
     with open(file_path, mode='wb') as csp_file:
-      pickle.dump(csp, csp_file)
-    
+        pickle.dump(csp, csp_file)
+
     file_name = "lda_subject" + str(subject) + ".pickle"
     file_path = "data/models/lda/" + file_name
     with open(file_path, mode='wb') as lda_file:
@@ -39,8 +42,10 @@ def save_model(subject, runs, event_id):
     with open(file_path, mode='wb') as svm_file:
         pickle.dump(_svm, svm_file)
 
-for i in range(1, 110):
-    save_model(subject=i)
 
-# save_model(subject=1)
+save_model(subject=1)
+
+# for i in range(1, 110):
+#     save_model(subject=i)
+
 print("ended")

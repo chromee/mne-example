@@ -1,8 +1,10 @@
 # EEGの時系列データをリアルタイムにとってるっぽくmatplotlibで表示するプログラム
 
-import os, sys, numpy as np
+import os
+import sys
+import numpy as np
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from lib.mne_wrapper import get_raw
+from mylib.mne_wrapper import get_raw
 import pandas as pd
 import matplotlib.pyplot as plt
 from time import sleep
@@ -21,12 +23,9 @@ y = data[1][0:time_range*sfreq]
 lines, = ax.plot(x, y)
 
 for i in range(len(data[0])):
-    # for ch in data:
-    # print(data[1][i])
     x += interval
     y = data[1][i:i+time_range*sfreq]
     lines.set_data(x, y)
     ax.set_xlim((x.min(), x.max()))
     ax.set_ylim((y.min(), y.max()))
     plt.pause(interval)
-
