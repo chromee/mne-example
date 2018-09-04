@@ -17,8 +17,6 @@ def save_model(subject):
     epochs = get_epochs(subject)
     epochs_data = epochs.get_data()
     labels = epochs.events[:, -1] - 2
-    print(epochs_data.shape)
-    exit()
 
     csp = mne.decoding.CSP(n_components=4, reg=None,
                            log=True, norm_trace=False)
