@@ -1,5 +1,5 @@
-CH_INDEX = list(range(1,17))  # zero-baesd
-TIME_INDEX = None # integer or None. None = average of raw values of the current window
+CH_INDEX = list(range(1, 17))  # zero-baesd
+TIME_INDEX = None  # integer or None. None = average of raw values of the current window
 SHOW_PSD = False
 
 import os
@@ -10,20 +10,22 @@ from pycnbi.stream_receiver.stream_receiver import StreamReceiver
 import pycnbi.utils.pycnbi_utils as pu
 import pycnbi.utils.q_common as qc
 mne.set_log_level('ERROR')
-os.environ['OMP_NUM_THREADS'] = '1' # actually improves performance for multitaper
+# actually improves performance for multitaper
+os.environ['OMP_NUM_THREADS'] = '1'
 
 amp_name, amp_serial = pu.search_lsl()
-sr = StreamReceiver(window_size=1, buffer_size=1, amp_serial=amp_serial, eeg_only=False, amp_name=amp_name)
-sfreq = sr.get_sample_rate()
+stream_receiver = StreamReceiver(
+    window_size=1, buffer_size=1, amp_serial=amp_serial, eeg_only=False, amp_name=amp_name)
+sfreq = stream_receiver.get_sample_rate()
 watchdog = qc.Timer()
 tm = qc.Timer(autoreset=True)
-trg_ch = sr.get_trigger_channel()
+trg_ch = stream_receiver.get_trigger_channel()
 last_ts = 0
 qc.print_c('Trigger channel: %d' % trg_ch, 'G')
 
 if SHOW_PSD:
-    psde = mne.decoding.PSDEstimator(sfreq=sfreq, fmin=1, fmax=50, bandwidth=None, \
-        adaptive=False, low_bias=True, n_jobs=1, normalization='length', verbose=None)
+    psde = mne.decoding.PSDEstimator(sfreq=sfreq, fmin=1, fmax=50, bandwidth=None,
+                                     adaptive=False, low_bias=True, n_jobs=1, normalization='length', verbose=None)
 
 sfreq = 512
 interval = 1. / sfreq
@@ -34,9 +36,10 @@ y = [0]*(time_range*sfreq)
 lines, = ax.plot(x, y)
 
 while True:
-    sr.acquire()
-    window, tslist = sr.get_window() # window = [samples x channels]
-    window = window.T # chanel x samples
+    stream_receiver.acquire()
+    # window = [samples x channels]
+    window, tslist = stream_receiver.get_window()
+    window = window.T  # chanel x samples
     # print(window)
 
     # # print event values
