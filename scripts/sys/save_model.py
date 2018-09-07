@@ -14,9 +14,10 @@ from mylib.mne_wrapper import get_epochs
 
 
 def save_model(subject):
-    epochs = get_epochs(subject)
+    epochs = get_epochs(subject, runs=[6, 10, 14],
+                        event_id=dict(rest=1, hands=2, feet=3))
     epochs_data = epochs.get_data()
-    labels = epochs.events[:, -1] - 2
+    labels = epochs.events[:, -1]
 
     csp = mne.decoding.CSP(n_components=4, reg=None,
                            log=True, norm_trace=False)

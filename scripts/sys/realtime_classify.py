@@ -9,7 +9,7 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from mylib.mne_wrapper import get_raw
 
-subject = 2
+subject = 1
 sfreq = 512
 interval = 1. / sfreq
 
@@ -23,7 +23,7 @@ with open("./data/models/lda/lda_subject" + str(subject) + ".pickle", 'rb') as p
 with open("./data/models/svm/svm_subject" + str(subject) + ".pickle", 'rb') as pickle_file:
     svm = pickle.load(pickle_file)
 
-w_length = 801  # 学習epochのlength
+w_length = 161  # 学習epochのlength
 w_step = int(sfreq)
 
 current_step = 0
@@ -37,11 +37,16 @@ for i in range(len(data[0])):
         X_test = csp.transform(window)
         label = svm.predict(X_test)
 
-        print(i, label)
-
         current_step = 0
         count += 1
-        if label == data[16][i]:
+
+        window_labels = np.array(data[16][i:i+w_length], dtype=np.int64)
+        label_count = np.bincount(window_labels)
+        argmax_label = np.argmax(label_count)
+
+        print(i, label, argmax_label)
+
+        if label == argmax_label:
             score += 1
     sleep(interval)
 print(score/count)
