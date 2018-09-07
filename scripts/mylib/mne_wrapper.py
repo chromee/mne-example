@@ -45,7 +45,7 @@ def get_epochs_from_csv(path):
     return epochs
 
 
-def get_raw(subject, runs=[6, 10, 14], event_id=dict(hands=2, feet=3)):
+def get_raw(subject, runs=[6, 10, 14]):
     raw_fnames = eegbci.load_data(subject, runs)
     raw_files = [read_raw_edf(f, preload=True, stim_channel='auto')
                  for f in raw_fnames]
