@@ -20,9 +20,7 @@ mne.set_log_level('WARNING')
 
 def culc_by_csp_and_lda(subject, runs=[6, 10, 14], event_id=dict(rest=1, hands=2, feet=3)):
     tmin, tmax = -1., 4.
-
-    raw = get_raw(subject, runs=[6, 10, 14],
-                  event_id=dict(rest=1, hands=2, feet=3))
+    raw = get_raw(subject, runs)
     events = find_events(raw, shortest_event=0, stim_channel='STI 014')
     picks = pick_types(raw.info, meg=False, eeg=True, stim=False, eog=False,
                        exclude='bads')
@@ -37,7 +35,6 @@ def culc_by_csp_and_lda(subject, runs=[6, 10, 14], event_id=dict(rest=1, hands=2
 
     cv = KFold(n_splits=5)
 
-    # lda = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
     lda = svm.SVC()
     csp = mne.decoding.CSP(n_components=4, reg=None,
                            log=True, norm_trace=False)
@@ -47,9 +44,68 @@ def culc_by_csp_and_lda(subject, runs=[6, 10, 14], event_id=dict(rest=1, hands=2
     return np.mean(scores)
 
 
-score = culc_by_csp_and_lda(1)
-print(score)
+# runs = [4, 8, 12]
+# event_id = dict(rest=1, left=2, right=3)
 
-for i in range(1, 10):
-    score = culc_by_csp_and_lda(i)
+runs = [6, 10, 14]
+event_id = dict(rest=1, hands=2, feet=3)
+
+# score = culc_by_csp_and_lda(1)
+# print(score)
+
+
+runs = [4, 8, 12]
+event_id = dict(left=2, right=3)
+
+results = []
+
+scores = []
+for i in range(1, 110):
+    score = culc_by_csp_and_lda(i, runs=runs, event_id=event_id)
     print(score)
+    scores.append(score)
+scores = np.array(scores)
+print("average:", scores.mean())
+results.append(scores)
+
+
+runs = [6, 10, 14]
+event_id = dict(hands=2, feet=3)
+
+scores = []
+for i in range(1, 110):
+    score = culc_by_csp_and_lda(i, runs=runs, event_id=event_id)
+    print(score)
+    scores.append(score)
+scores = np.array(scores)
+print("average:", scores.mean())
+results.append(scores)
+
+
+runs = [4, 8, 12]
+event_id = dict(rest=1, left=2, right=3)
+
+scores = []
+for i in range(1, 110):
+    score = culc_by_csp_and_lda(i, runs=runs, event_id=event_id)
+    print(score)
+    scores.append(score)
+scores = np.array(scores)
+print("average:", scores.mean())
+results.append(scores)
+
+
+runs = [6, 10, 14]
+event_id = dict(rest=1, hands=2, feet=3)
+
+scores = []
+for i in range(1, 110):
+    score = culc_by_csp_and_lda(i, runs=runs, event_id=event_id)
+    print(score)
+    scores.append(score)
+scores = np.array(scores)
+print("average:", scores.mean())
+results.append(scores)
+
+results = np.array(results)
+np.savetxt("svm_acu.csv", results.T, delimiter=",")

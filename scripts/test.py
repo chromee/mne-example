@@ -1,5 +1,6 @@
 from pathlib import Path
 import numpy as np
+
 # a=[1,2,3] + [4]
 # print(a)
 
@@ -30,13 +31,20 @@ import numpy as np
 # l = [0] * 17
 # print(l)
 
-import os
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from mylib.mne_wrapper import get_epochs
+# import os
+# import sys
+# sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+# from mylib.mne_wrapper import get_epochs
 
 
-epochs = get_epochs(1)
-epochs_data = epochs.get_data()
-labels = epochs.events[:, -1] - 2
-print(labels)
+# epochs = get_epochs(1)
+# epochs_data = epochs.get_data()
+# labels = epochs.events[:, -1] - 2
+# print(labels)
+
+a = np.array([
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+])
+np.savetxt("test.csv", a.T, delimiter=",")
