@@ -8,6 +8,11 @@ from mne.io import concatenate_raws, read_raw_edf
 from mne.datasets import eegbci
 import mne.decoding
 
+import sklearn.pipeline
+import sklearn.discriminant_analysis
+from sklearn.model_selection import KFold, cross_val_score
+from sklearn import svm
+
 
 mne.set_log_level('WARNING')
 
@@ -76,3 +81,29 @@ def stream_virtual_eeg_signal(subject, processing, runs=[6, 10, 14], event_id=di
     for i in range(len(data[0])):
         processing(i)
         sleep(interval)
+
+
+def get_cross_val_score(subject, runs=[6, 10, 14], event_id=dict(rest=1, hands=2, feet=3), n_components=4, C=1.):
+    tmin, tmax = -1., 4.
+    raw = get_raw(subject, runs)
+    events = find_events(raw, shortest_event=0, stim_channel='STI 014')
+    picks = pick_types(raw.info, meg=False, eeg=True, stim=False, eog=False,
+                       exclude='bads')
+
+    epochs = Epochs(raw, events, event_id, tmin, tmax, proj=True, picks=picks,
+                    baseline=None, preload=True)
+    epochs_train = epochs.copy().crop(tmin=1., tmax=2.)
+    labels = epochs.events[:, -1]
+
+    scores = []
+    epochs_data_train = epochs_train.get_data()
+
+    cv = KFold(n_splits=5)
+
+    svc = svm.SVC(kernel='linear', C=C)
+    csp = mne.decoding.CSP(n_components=n_components, reg=None,
+                           log=True, norm_trace=False)
+
+    clf = sklearn.pipeline.Pipeline([('CSP', csp), ('SVM', svc)])
+    scores = cross_val_score(clf, epochs_data_train, labels, cv=cv, n_jobs=1)
+    return np.mean(scores)

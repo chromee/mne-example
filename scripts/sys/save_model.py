@@ -44,10 +44,10 @@ def save_model(subject):
         pickle.dump(_svm, svm_file)
 
 
-save_model(subject=1)
+# save_model(subject=1)
 
-# for i in range(1, 110):
-#     save_model(subject=i)
-#     print(i)
+for i in range(1, 110):
+    save_model(subject=i)
+    print(i)
 
 print("ended")
