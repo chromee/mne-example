@@ -10,19 +10,18 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from mylib.mne_wrapper import get_raw
 
 
-def get_score(subject=1):
-    # subject = 1
-    sfreq = 512
-    interval = 1. / sfreq
+def get_score(subject, event):
+    if event == "left_vs_right":
+        runs = [4, 8, 12]
+    else:
+        runs = [6, 10, 14]
 
-    raw = get_raw(subject)
+    raw = get_raw(subject, runs=runs)
     data = raw.get_data()
 
-    with open("./data/models/csp/csp_subject" + str(subject) + ".pickle", 'rb') as pickle_file:
+    with open("./data/models/three/" + event + "/csp/csp_subject" + str(subject) + ".pickle", 'rb') as pickle_file:
         csp = pickle.load(pickle_file)
-    # with open("./data/models/lda/lda_subject" + str(subject) + ".pickle", 'rb') as pickle_file:
-    #     lda = pickle.load(pickle_file)
-    with open("./data/models/svm/svm_subject" + str(subject) + ".pickle", 'rb') as pickle_file:
+    with open("./data/models/three/" + event + "/svm/svm_subject" + str(subject) + ".pickle", 'rb') as pickle_file:
         svm = pickle.load(pickle_file)
 
     w_length = 160  # 学習epochのlength
@@ -46,16 +45,17 @@ def get_score(subject=1):
             label_count = np.bincount(window_labels)
             argmax_label = np.argmax(label_count)
 
-            print(i, label, argmax_label)
+            # print(i, label, argmax_label)
 
             if label == argmax_label:
                 score += 1
         # sleep(interval)
-    print(i, score/count)
+    # print(i, score/count)
     return score/count
 
 
 scores = []
 for i in range(1, 110):
-    scores.append(get_score(subject=i))
+    scores.append(get_score(i, "left_vs_right"))
+    print(i)
 np.savetxt("real_acu.csv", scores, delimiter=",")
