@@ -1,10 +1,10 @@
 # EEGの時系列データをリアルタイムにとってるっぽくmatplotlibで表示するプログラム
 
 import numpy as np
-from mne_wrapper import get_raw
 import pandas as pd
 import matplotlib.pyplot as plt
 from time import sleep
+from mne_wrapper import get_raw
 
 subject = 1
 raw = get_raw(subject)
