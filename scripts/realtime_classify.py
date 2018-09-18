@@ -4,10 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from time import sleep
 import mne
-import os
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from mylib.mne_wrapper import get_raw
+from mne_wrapper import get_raw
 
 
 def get_score(subject, event):

@@ -7,10 +7,7 @@ import sklearn.discriminant_analysis
 from sklearn import svm
 
 import mne
-import os
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from mylib.mne_wrapper import get_epochs
+from mne_wrapper import get_epochs
 
 
 def save_model(subject, runs, event_id, parent_path):

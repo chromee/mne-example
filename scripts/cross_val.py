@@ -10,10 +10,7 @@ from sklearn import svm
 import mne
 from mne import Epochs, pick_types, find_events
 
-import os
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from mylib.mne_wrapper import get_raw
+from mne_wrapper import get_raw
 
 mne.set_log_level('WARNING')
 
@@ -34,7 +31,7 @@ def get_cross_val_score(subject, runs=[6, 10, 14], event_id=dict(rest=1, hands=2
 
     cv = KFold(n_splits=5)
 
-    svc = svm.SVC()
+    svc = svm.SVC(kernel="linear")
     csp = mne.decoding.CSP(n_components=n_components, reg=None,
                            log=True, norm_trace=False)
 
@@ -45,7 +42,6 @@ def get_cross_val_score(subject, runs=[6, 10, 14], event_id=dict(rest=1, hands=2
         x = epochs_data_train[train]
         y = labels[train]
         x = csp.fit_transform(x, y)
-        print(csp.filters_.shape)
         svc.fit(x, y)
         self_scores.append(svc.score(x, y))
 
@@ -56,6 +52,9 @@ def get_cross_val_score(subject, runs=[6, 10, 14], event_id=dict(rest=1, hands=2
         score = svc.score(x_test, y_test)
         scores.append(score)
     return np.mean(self_scores), np.mean(scores)
+
+
+print(get_cross_val_score(1))
 
 
 def get_scores_self_scores(runs, event_id):
@@ -95,11 +94,11 @@ results = []
 # results.append(self_scores)
 
 
-runs = [6, 10, 14]
-event_id = dict(rest=1, hands=2, feet=3)
-scores, self_scores = get_scores_self_scores(runs, event_id)
-results.append(scores)
-results.append(self_scores)
+# runs = [6, 10, 14]
+# event_id = dict(rest=1, hands=2, feet=3)
+# scores, self_scores = get_scores_self_scores(runs, event_id)
+# results.append(scores)
+# results.append(self_scores)
 
 # results = np.array(results)
 # np.savetxt("svm_acu.csv", results.T, delimiter=",")
