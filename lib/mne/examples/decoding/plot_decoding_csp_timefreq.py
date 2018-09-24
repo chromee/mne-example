@@ -4,11 +4,10 @@ Decoding in time-frequency space data using the Common Spatial Pattern (CSP)
 ============================================================================
 
 
-The time-frequency decomposition is estimated by iterating over raw data that
-has been band-passed at different frequencies. This is used to compute a
-covariance matrix over each epoch or a rolling time-window and extract the CSP
-filtered signals. A linear discriminant classifier is then applied to these
-signals.
+時間 - 周波数分解は、異なる周波数でバンドパスされた生データを反復
+することによって推定される。 これは、各エポックまたはローリング時
+間ウィンドウにわたる共分散行列を計算し、CSPフィルタ信号を抽出する
+ために使用されます。 線形判別判別器は、これらの信号に適用される。
 """
 # Authors: Laura Gwilliams <laura.gwilliams@nyu.edu>
 #          Jean-Remi King <jeanremi.king@gmail.com>
@@ -30,6 +29,9 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import LabelEncoder
+
+import mne
+mne.set_log_level('WARNING')
 
 ###############################################################################
 # Set parameters and read data
@@ -59,11 +61,13 @@ min_freq = 5.
 max_freq = 25.
 n_freqs = 8  # how many frequency bins to use
 
-# Assemble list of frequency range tuples
+# Assemble list of frequency range tuples [ 5. 7.85714286 10.71428571 13.57142857 16.42857143 19.28571429 22.14285714 25.]
 freqs = np.linspace(min_freq, max_freq, n_freqs)  # assemble frequencies
-freq_ranges = list(zip(freqs[:-1], freqs[1:]))  # make freqs list of tuples
+# make freqs list of tuples
+freq_ranges = list(zip(freqs[:-1], freqs[1:]))
 
 # Infer window spacing from the max freq and number of cycles to avoid gaps
+# ギャップを避けるための最大周波数とサイクル数からウィンドウ間隔を推測する
 window_spacing = (n_cycles / np.max(freqs) / 2.)
 centered_w_times = np.arange(tmin, tmax, window_spacing)[1:]
 n_windows = len(centered_w_times)
