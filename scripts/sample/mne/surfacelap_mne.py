@@ -20,17 +20,14 @@ raw_fnames = eegbci.load_data(subject, runs)
 raw_files = [read_raw_edf(f, preload=True, stim_channel='auto') for f in raw_fnames]
 raw = concatenate_raws(raw_files)
 
-print(raw.info)
-exit()
-
 raw.rename_channels(lambda x: x.strip('.'))
+montage = mne.channels.read_montage('standard_1020')
+raw.set_montage(montage)
 # raw.filter(7., 30., fir_design='firwin', skip_by_annotation='edge')
 
 events = find_events(raw, shortest_event=0, stim_channel='STI 014')
 picks = pick_types(raw.info, meg=False, eeg=True, stim=False, eog=False, exclude='bads')
-montage = mne.channels.read_montage('biosemi64')
-epochs = Epochs(raw, events, event_id, tmin=-1., tmax=4., proj=True, picks=picks, baseline=None, preload=True, montage=montage)
-print(montage)
+epochs = Epochs(raw, events, event_id, tmin=-1., tmax=4., proj=True, picks=picks, baseline=None, preload=True)
 
 surf_lap, surf_orig = surface_laplacian(epochs=epochs, m=4, leg_order=50, smoothing=1e-5, montage=montage)
 
