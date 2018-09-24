@@ -43,8 +43,15 @@ import numpy as np
 # print(labels)
 
 a = np.array([
-    [1, 2, 3],
+    [, 2, 3],
     [4, 5, 6],
     [7, 8, 9]
 ])
-np.savetxt("test.csv", a.T, delimiter=",")
+a = a.mean(axis=0)
+print(a)
+# np.savetxt("test.csv", a.T, delimiter=",")
+
+# a = np.zeros((3, 4, 20))
+# print(a)
+# a = a.reshape((3, 80))
+# print(a)
