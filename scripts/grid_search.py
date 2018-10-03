@@ -51,6 +51,14 @@ def grid_search(subject=1):
     print(timeit.timeit(main1, number=1))
 
 
+def find_best_score(subject=1):
+    book = pd.read_excel("data/grid/grid_%d.xlsx" % subject)
+    print(book["mean_test_score"].max())
+    # id = book["mean_test_score"].idxmax()
+    # print(book.iloc[id])
+
+
 if __name__ == "__main__":
     for i in range(1, 110):
-        grid_search(i)
+        #     grid_search(i)
+        find_best_score(subject=i)
