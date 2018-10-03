@@ -33,7 +33,7 @@ def grid_search(subject=1):
     pl = Pipeline([("csp", csp), ("fft", fft), ("svm", svm)])
 
     params = {"csp__n_components": np.arange(4, 10),
-              "svm__C": np.logspace(-4, 0, 5),
+              "svm__C": np.arange(1000, 10000, 1000),
               "svm__gamma": np.logspace(-4, 0, 5)}
 
     clf = GridSearchCV(pl, params, n_jobs=-1)
@@ -43,7 +43,7 @@ def grid_search(subject=1):
     #           "param_svm__C", "param_svm__gamma",
     #           "mean_score_time",
     #           "mean_test_score"]])
-    df.to_excel("grid_%s.xlsx" % subject, index=False, header=True)
+    df.to_excel("grid_fft_%s.xlsx" % subject, index=False, header=True)
     print("%s end" % subject)
 
 
