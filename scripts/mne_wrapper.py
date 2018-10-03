@@ -107,3 +107,31 @@ def get_cross_val_score(subject, runs=[6, 10, 14], event_id=dict(rest=1, hands=2
     clf = sklearn.pipeline.Pipeline([('CSP', csp), ('SVM', svc)])
     scores = cross_val_score(clf, epochs_data_train, labels, cv=cv, n_jobs=1)
     return np.mean(scores)
+
+
+from sklearn.base import BaseEstimator, TransformerMixin
+
+
+class FFT(BaseEstimator, TransformerMixin):
+    def __init__(self, R=20):
+        self.R = R
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        x = np.fft.fft(X)
+        x = np.abs(x)
+        x = self.down_sample(x)
+        return x
+
+    def down_sample(self, x):
+        ary = np.zeros((x.shape[0], x.shape[1], self.R))
+        for epoch in range(x.shape[0]):
+            for k in range(x.shape[1]):
+                split_arr = np.linspace(
+                    0, len(x[epoch][k]), num=self.R+1, dtype=int)
+                dwnsmpl_subarr = np.split(x[epoch][k], split_arr[1:])
+                ary[epoch][k] = np.array(list(np.nanmean(item)
+                                              for item in dwnsmpl_subarr[:-1]))
+        return ary.reshape((ary.shape[0], ary.shape[1]*ary.shape[2]))
