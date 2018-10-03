@@ -53,12 +53,19 @@ def grid_search(subject=1):
 
 def find_best_score(subject=1):
     book = pd.read_excel("data/grid/grid_%d.xlsx" % subject)
-    print(book["mean_test_score"].max())
-    # id = book["mean_test_score"].idxmax()
-    # print(book.iloc[id])
+    id = book["mean_test_score"].idxmax()
+    # print(book["mean_test_score"].max())
+    # print(id)
+    return book.iloc[id]
 
 
 if __name__ == "__main__":
+    serieses = []
     for i in range(1, 110):
-        #     grid_search(i)
-        find_best_score(subject=i)
+        # grid_search(i)
+        sbj = pd.Series(i, index=["subject"])
+        info = find_best_score(subject=i)
+        s = pd.concat([sbj, info])
+        serieses.append(s)
+    pd.DataFrame(serieses).to_excel(
+        "data/grid/best_scores.xlsx", index=False, header=True)

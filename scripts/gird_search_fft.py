@@ -43,7 +43,8 @@ def grid_search(subject=1):
     #           "param_svm__C", "param_svm__gamma",
     #           "mean_score_time",
     #           "mean_test_score"]])
-    df.to_excel("grid_fft_%s.xlsx" % subject, index=False, header=True)
+    df.to_excel("data/gird_fft/grid_fft_%s.xlsx" %
+                subject, index=False, header=True)
     print("%s end" % subject)
 
 
