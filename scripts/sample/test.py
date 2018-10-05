@@ -1,5 +1,6 @@
 from pathlib import Path
 import numpy as np
+import pandas as pd
 
 # a=[1,2,3] + [4]
 # print(a)
@@ -42,13 +43,13 @@ import numpy as np
 # labels = epochs.events[:, -1] - 2
 # print(labels)
 
-a = np.array([
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 9]
-])
-a = a.mean(axis=0)
-print(a)
+# a = np.array([
+#     [1, 2, 3],
+#     [4, 5, 6],
+#     [7, 8, 9]
+# ])
+# a = a.mean(axis=0)
+# print(a)
 # np.savetxt("test.csv", a.T, delimiter=",")
 
 # a = np.zeros((3, 4, 20))
@@ -65,8 +66,8 @@ print(a)
 # a = np.arange(0, 801/160, 1/160)
 # print(a)
 
-a = np.linspace(5., 25., 8)
-b = list(zip(a[:-1], a[1:]))
+# a = np.linspace(5., 25., 8)
+# b = list(zip(a[:-1], a[1:]))
 # # [ 5. 7.85714286 10.71428571 13.57142857 16.42857143 19.28571429 22.14285714 25. ]
 # print(a)
 # # [ 5. 7.85714286 10.71428571 13.57142857 16.42857143 19.28571429 22.14285714]
@@ -78,5 +79,15 @@ b = list(zip(a[:-1], a[1:]))
 # # (16.42857142857143, 19.285714285714285), (19.285714285714285, 22.142857142857142),
 # # (22.142857142857142, 25.0)]
 # print(b)
-for freq, (fmin, fmax) in enumerate(b):
-    print(freq, fmin, fmax)
+# for freq, (fmin, fmax) in enumerate(b):
+#     print(freq, fmin, fmax)
+
+def test(i):
+    return [i, i*i]
+
+
+a = pd.DataFrame(columns=["a", "b"])
+for i in range(10):
+    se = pd.Series(test(i), index=a.columns)
+    a = a.append(se, ignore_index=True)
+print(a)
