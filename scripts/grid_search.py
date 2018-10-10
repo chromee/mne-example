@@ -27,7 +27,7 @@ def grid_search(subject=1):
     epochs = Epochs(raw, events, event_id, tmin, tmax, proj=True, picks=picks,
                     baseline=None, preload=True)
     epochs_data_train = epochs.copy().crop(tmin=1., tmax=2.).get_data()
-    labels = epochs.events[:, -1] - 1
+    labels = epochs.events[:, -1]
 
     csp = mne.decoding.CSP(reg=None, log=True, norm_trace=False)
     svm = SVC()
@@ -38,21 +38,17 @@ def grid_search(subject=1):
               "svm__gamma": np.logspace(-4, 0, 5)}
 
     def main1():
-        clf = GridSearchCV(pl, params, n_jobs=-1)
+        clf = GridSearchCV(pl, params, n_jobs=-1, cv=10)
         clf.fit(epochs_data_train, labels)
         df = pd.DataFrame(clf.cv_results_)
-        # print(df[["param_csp__n_components",
-        #           "param_svm__C", "param_svm__gamma",
-        #           "mean_score_time",
-        #           "mean_test_score"]])
-        df.to_excel("data/grid/grid_%s.xlsx" %
+        df.to_excel("data/grid/grid_default_%s.xlsx" %
                     subject, index=False, header=True)
         print("%s end" % subject)
     print(timeit.timeit(main1, number=1))
 
 
 def find_best_score(subject=1):
-    book = pd.read_excel("data/grid/grid_%d.xlsx" % subject)
+    book = pd.read_excel("data/grid/grid_default_%d.xlsx" % subject)
     id = book["mean_test_score"].idxmax()
     # print(book["mean_test_score"].max())
     # print(id)
@@ -60,12 +56,16 @@ def find_best_score(subject=1):
 
 
 if __name__ == "__main__":
-    serieses = []
+    # grid_search(1)
+
     for i in range(1, 110):
-        # grid_search(i)
-        sbj = pd.Series(i, index=["subject"])
-        info = find_best_score(subject=i)
-        s = pd.concat([sbj, info])
-        serieses.append(s)
-    pd.DataFrame(serieses).to_excel(
-        "data/grid/best_scores.xlsx", index=False, header=True)
+        grid_search(i)
+
+    # serieses = []
+    # for i in range(1, 110):
+    #     sbj = pd.Series(i, index=["subject"])
+    #     info = find_best_score(subject=i)
+    #     s = pd.concat([sbj, info])
+    #     serieses.append(s)
+    # pd.DataFrame(serieses).to_excel(
+    #     "data/grid/best_scores.xlsx", index=False, header=True)
