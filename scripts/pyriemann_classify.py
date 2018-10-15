@@ -35,7 +35,7 @@ def get_score(subject=7, runs=[6, 10, 14], event_id=dict(hands=2, feet=3)):
     labels = epochs.events[:, -1]
 
     # cv = KFold(len(labels), 10, shuffle=True, random_state=42)
-    epochs_data_train = 1e6*epochs.get_data()
+    epochs_data_train = epochs.get_data()[:, :-1]
     cov_data_train = Covariances().transform(epochs_data_train)
 
     ###############################################################################
@@ -43,7 +43,6 @@ def get_score(subject=7, runs=[6, 10, 14], event_id=dict(hands=2, feet=3)):
     mdm = MDM(metric=dict(mean='riemann', distance='riemann'))
     pl = Pipeline([("mdm", mdm)])
     params = {"mdm__metric": [dict(mean='riemann', distance='riemann')]}
-
     clf = GridSearchCV(pl, params, n_jobs=-1, cv=5, return_train_score=True)
     clf.fit(cov_data_train, labels)
     df = pd.DataFrame(clf.cv_results_)
@@ -67,16 +66,12 @@ def get_score(subject=7, runs=[6, 10, 14], event_id=dict(hands=2, feet=3)):
 
 
 if __name__ == "__main__":
-    # print(get_score(subject=7))
+    # print(get_score(subject=10)["mean_test_score"])
 
-    # columns = ["subject", "mdm_score", "ts_score"]
-    # scores = pd.DataFrame(columns=columns)
     results = []
     for i in range(1, 110):
         print(i)
-        results.append(get_score(subject=i))
+        results.append(
+            get_score(subject=i, event_id=dict(rest=1, hands=2, feet=3)))
     df = pd.concat(results)
-    df.to_excel("data/two_class_riemann_5.xlsx", index=False)
-    #     se = pd.Series(get_score(subject=i), index=columns)
-    #     scores = scores.append(se, ignore_index=True)
-    # scores.to_excel("pyriemann_scores.xlsx", index=False)
+    df.to_excel("data/three_class_riemann.xlsx", index=False)

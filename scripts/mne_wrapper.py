@@ -31,25 +31,6 @@ low_freq = 7.
 high_freq = 30.
 
 
-def get_epochs_from_csv(path):
-    data = np.loadtxt(path, delimiter=",", skiprows=1).T
-    ch_types = ["eeg" for i in range(16)] + ["stim"]
-
-    info = mne.create_info(ch_names=ch_names, sfreq=512, ch_types=ch_types)
-    raw = mne.io.RawArray(data[1:], info)
-    raw.filter(low_freq, high_freq, fir_design='firwin',
-               skip_by_annotation='edge')
-
-    events = mne.find_events(raw, stim_channel='STIM')
-    picks = mne.pick_types(raw.info, meg=False, eeg=True,
-                           stim=False, eog=False, exclude='bads')
-
-    event_id = dict(right=1, left=2)
-    epochs = Epochs(raw, events, event_id, tmin=-1., tmax=4.,
-                    proj=True, picks=picks, baseline=None, preload=True)
-    return epochs
-
-
 def get_raw(subject, runs=[6, 10, 14]):
     raw_fnames = eegbci.load_data(subject, runs)
     raw_files = [read_raw_edf(f, preload=True, stim_channel='auto')
@@ -107,6 +88,25 @@ def get_cross_val_score(subject, runs=[6, 10, 14], event_id=dict(rest=1, hands=2
     clf = sklearn.pipeline.Pipeline([('CSP', csp), ('SVM', svc)])
     scores = cross_val_score(clf, epochs_data_train, labels, cv=cv, n_jobs=1)
     return np.mean(scores)
+
+
+def get_epochs_from_csv(path):
+    data = np.loadtxt(path, delimiter=",", skiprows=1).T
+    ch_types = ["eeg" for i in range(16)] + ["stim"]
+
+    info = mne.create_info(ch_names=ch_names, sfreq=512, ch_types=ch_types)
+    raw = mne.io.RawArray(data[1:], info)
+    raw.filter(low_freq, high_freq, fir_design='firwin',
+               skip_by_annotation='edge')
+
+    events = mne.find_events(raw, stim_channel='STIM')
+    picks = mne.pick_types(raw.info, meg=False, eeg=True,
+                           stim=False, eog=False, exclude='bads')
+
+    event_id = dict(right=1, left=2)
+    epochs = Epochs(raw, events, event_id, tmin=-1., tmax=4.,
+                    proj=True, picks=picks, baseline=None, preload=True)
+    return epochs
 
 
 from sklearn.base import BaseEstimator, TransformerMixin
