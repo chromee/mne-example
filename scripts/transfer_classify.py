@@ -1,24 +1,10 @@
-"""
-====================================================================
-Motor imagery classification
-====================================================================
-
-Classify Motor imagery data with Riemannian Geometry.
-"""
-# generic import
 import numpy as np
 import pandas as pd
-import seaborn as sns
-from matplotlib import pyplot as plt
+import pickle
 
-# mne import
 import mne
 from mne import Epochs, pick_types
-from mne.io import concatenate_raws
-from mne.io.edf import read_raw_edf
-from mne.datasets import eegbci
 from mne.event import find_events
-from mne.decoding import CSP
 
 # pyriemann import
 from pyriemann.classification import MDM, TSclassifier
@@ -27,91 +13,123 @@ from pyriemann.estimation import Covariances
 # sklearn imports
 from sklearn.model_selection import cross_val_score, KFold
 from sklearn.pipeline import Pipeline
-# from sklearn.linear_model import LogisticRegressions
+
 from mne_wrapper import get_raw
-import copy
 
 mne.set_log_level('WARNING')
 
+EPOCH_COUNT = 87
 
-def get_score(subject=7):
-    runs = [6, 10, 14]
-    event_id = dict(rest=1, hands=2, feet=3)
+
+def get_score(subject=7, runs=[6, 10, 14], event_id=dict(hands=2, feet=3)):
     tmin, tmax = -1., 4.
 
     # learn all suject exclude target subject. #############################
-    raw = get_raw(2, runs)
-    for i in range(3, 6):
+    first_sub = 2 if subject == 1 else 1
+    raw = get_raw(first_sub, runs)
+    for i in range(first_sub+1, 3):
         if i != subject and not (i in [88, 89, 92, 100]):
-            print(i)
+            # print(i)
             raw.append(get_raw(i, runs))
+    raw.append(get_raw(subject, runs))
 
     events = find_events(raw, shortest_event=0, stim_channel='STI 014')
     epochs = Epochs(raw, events, event_id, tmin, tmax, proj=True,
                     baseline=None, preload=True, verbose=False)
+
     labels = epochs.events[:, -1]
-    epochs_data_train = 1e6*epochs.get_data()
+    epochs_data_train = 1e6*epochs.get_data()[:, :-1]
     cov_data_train = Covariances().transform(epochs_data_train)
 
-    mdm = MDM(metric=dict(mean='riemann', distance='riemann'))
-    mdm.fit(cov_data_train, labels)
-
-    ###########################################################################
-
-    raw = get_raw(subject, runs)
-    events = find_events(raw, shortest_event=0, stim_channel='STI 014')
-    epochs = Epochs(raw, events, event_id, tmin, tmax, proj=True,
-                    baseline=None, preload=True, verbose=False)
-    labels = epochs.events[:, -1]
-    epochs_data_train = 1e6*epochs.get_data()
-    cov_data_train = Covariances().transform(epochs_data_train)
-
-    # for sample_weight in np.arange(1, 3, 0.5):
-    #     mdm_cp = copy.copy(mdm)
-
-    cv = KFold(n_splits=10, shuffle=True, random_state=42)
+    weights = np.arange(0.1, 1.0, 0.1)
     scores = []
-    for train, test in cv.split(labels):
-        sample_weight = np.ones(train.size)*0.1
-        mdm.fit(cov_data_train[train], labels[train],
-                sample_weight=sample_weight)
-        y = mdm.predict(cov_data_train[test])
-        score = (y == labels[test]).sum()/len(test)
-        scores.append(score)
-    # scores = cross_val_score(mdm, cov_data_train, labels, cv=cv, n_jobs=1)
+    for weight in weights:
+        mdm = MDM(metric=dict(mean='riemann', distance='riemann'))
+        others_sample_weight_base = np.ones(
+            len(epochs)-EPOCH_COUNT)*(1.-weight)
+        target_sample_weight_base = np.ones(EPOCH_COUNT)*weight
+        sample_weight = np.hstack(
+            (others_sample_weight_base, target_sample_weight_base))
 
-    # Printing the results
-    class_balance = np.mean(labels == labels[0])
-    class_balance = max(class_balance, 1. - class_balance)
-    mdm_score = np.mean(scores)
-    print("MDM Classification accuracy: %f / Chance level: %f" % (mdm_score,
-                                                                  class_balance))
+        others_size = others_sample_weight_base.size
+        others_index = np.arange(others_size)
 
-    # ###############################################################################
-    # # Classification with Tangent Space Logistic Regression
-    # clf = TSclassifier()
-    # # Use scikit-learn Pipeline with cross_val_score function
-    # scores = cross_val_score(clf, cov_data_train, labels, cv=cv, n_jobs=1)
+        cv = KFold(n_splits=5, shuffle=True, random_state=42)
+        train_scores = []
+        test_scores = []
+        dumy_array = np.ones(EPOCH_COUNT)
+        for train_index, test_index in cv.split(dumy_array):
+            train_index = np.hstack((others_index, train_index+others_size))
+            x = cov_data_train[train_index]
+            y = labels[train_index]
+            mdm.fit(x, y, sample_weight=sample_weight[train_index])
+            score = (mdm.predict(x) == y).sum()/len(train_index)
+            train_scores.append(score)
 
-    # # Printing the results
-    # class_balance = np.mean(labels == labels[0])
-    # class_balance = max(class_balance, 1. - class_balance)
-    # ts_score = np.mean(scores)
-    # print("Tangent space Classification accuracy: %f / Chance level: %f" %
-    #       (ts_score, class_balance))
+            test_index = test_index + others_size
+            y = mdm.predict(cov_data_train[test_index])
+            score = (y == labels[test_index]).sum()/len(test_index)
+            test_scores.append(score)
 
-    # ###############################################################################
-
-    # return [subject, mdm_score]
+        train_score = np.mean(train_scores)
+        test_score = np.mean(test_scores)
+        scores.append([subject, weight, train_score, test_score])
+        # print("train:%s test:%s" % (train_score, test_score))
+    return scores
 
 
 if __name__ == "__main__":
-    print(get_score(subject=7))
+    # result = get_score(subject=7)
+    # df = pd.DataFrame(result)
+    # df.to_excel("data/test.xlsx", index=False)
 
-    # columns = ["subject", "mdm_score", "ts_score"]
-    # scores = pd.DataFrame(columns=columns)
-    # for i in range(1, 110):
-    #     print(i)
-    #     se = pd.Series(get_score(subject=i), index=columns)
-    #     scores = scores.append(se, ignore_index=True)
-    # scores.to_excel("pyriemann_scores.xlsx", index=False)
+    columns = ["subject", "target_sample_weight", "train_score", "test_score"]
+    subject_count = 3
+
+    df = pd.DataFrame(columns=columns)
+    for i in range(1, subject_count):
+        print("hands vs feet two class %d" % i)
+        result = get_score(
+            subject=i, runs=[6, 10, 14], event_id=dict(hands=2, feet=3))
+        tmp_df = pd.DataFrame(result, columns=columns)
+        df = df.append(tmp_df, ignore_index=True)
+    df.to_excel(
+        "data/transfer/hands_vs_feet_two_class_tl_pyriemann_scores.xlsx", index=False)
+
+    ###############################################################################
+
+    df = pd.DataFrame(columns=columns)
+    for i in range(1, subject_count):
+        print("hands vs feet three class %d" % i)
+        result = get_score(
+            subject=i, runs=[6, 10, 14], event_id=dict(rest=1, hands=2, feet=3))
+        tmp_df = pd.DataFrame(result, columns=columns)
+        df = df.append(tmp_df, ignore_index=True)
+    df.to_excel(
+        "data/transfer/hands_vs_feet_three_class_tl_pyriemann_scores.xlsx", index=False)
+
+    ###############################################################################
+
+    df = pd.DataFrame(columns=columns)
+    for i in range(1, subject_count):
+        print("left vs right two class %d" % i)
+        result = get_score(
+            subject=i, runs=[4, 8, 12], event_id=dict(left=2, right=3))
+        tmp_df = pd.DataFrame(result, columns=columns)
+        df = df.append(tmp_df, ignore_index=True)
+    df.to_excel(
+        "data/transfer/left_vs_right_two_class_tl_pyriemann_scores.xlsx", index=False)
+
+    ###############################################################################
+
+    df = pd.DataFrame(columns=columns)
+    for i in range(1, subject_count):
+        print("left vs right three class %d" % i)
+        result = get_score(
+            subject=i, runs=[4, 8, 12], event_id=dict(rest=1, left=2, right=3))
+        tmp_df = pd.DataFrame(result, columns=columns)
+        df = df.append(tmp_df, ignore_index=True)
+    df.to_excel(
+        "data/transfer/left_vs_right_three_class_tl_pyriemann_scores.xlsx", index=False)
+
+    print("end")
