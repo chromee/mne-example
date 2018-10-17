@@ -32,7 +32,7 @@ def get_score(subject=7, runs=[6, 10, 14], event_id=dict(hands=2, feet=3)):
     tmin, tmax = -1., 4.
 
     scores_each_wright = []
-    weights = np.arange(0.1, 0.3, 0.1)
+    weights = np.arange(0.1, 1.0, 0.1)
     for weight in weights:
         first_sub = 2 if subject == 1 else 1
         raw = get_raw(subject, runs)
