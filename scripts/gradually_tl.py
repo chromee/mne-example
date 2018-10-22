@@ -29,14 +29,14 @@ TRANS_SUBJECT_COUNT = 110
 def get_score(subject=7, runs=[6, 10, 14], event_id=dict(hands=2, feet=3)):
     if subject in EXCLUDE_SUBJECTS:
         return
-    tmin, tmax = -1., 4.
 
-    scores_each_wright = []
+    tmin, tmax = -1., 4.
     weights = np.arange(0.1, 1.0, 0.1)
+
     for weight in weights:
         first_sub = 2 if subject == 1 else 1
         raw = get_raw(subject, runs)
-        scores_each_wright.append([])
+        scores = []
         for i in range(first_sub, TRANS_SUBJECT_COUNT):
             print(i)
             if i == subject or (i in EXCLUDE_SUBJECTS):
@@ -83,20 +83,22 @@ def get_score(subject=7, runs=[6, 10, 14], event_id=dict(hands=2, feet=3)):
 
             train_score = np.mean(train_scores)
             test_score = np.mean(test_scores)
-            scores_each_wright[(int)(weight*10)-1].append(
-                [subject, i, train_score, test_score])
+            scores.append([subject, i, train_score, test_score])
+        df = pd.DataFrame(
+            scores, columns=["subject", "transfer_count", "train_score", "test_score"])
+        df.to_excel("data/riemann/gradually/test_subject_%d_weight_%e.xlsx" %
+                    (subject, weight), index=False)
 
-        y = np.array([x[-1] for x in scores_each_wright[-1]])
-        x = np.arange(1, y.size+1)
-        print(subject, weight)
-        plt.subplot(3, 3, (int)(weight*10))
-        plt.plot(x, y)
-    plt.savefig("data/transfer/gradually/subject_%d.svg" % (subject))
-    return scores_each_wright
+        # y = np.array([x[-1] for x in scores_each_wright[-1]])
+        # x = np.arange(1, y.size+1)
+        # print(subject, weight)
+        # plt.subplot(3, 3, (int)(weight*10))
+        # plt.plot(x, y)
+    # plt.savefig("data/transfer/gradually/subject_%d.svg" % (subject))
 
 
 if __name__ == "__main__":
     subject = 7
-    result = get_score(subject=subject)
-    df = pd.DataFrame(result)
-    df.to_excel("data/test_subject_%d.xlsx" % subject, index=False)
+    get_score(subject=subject)
+    # df = pd.DataFrame(result)
+    # df.to_excel("data/test_subject_%d.xlsx" % subject, index=False)

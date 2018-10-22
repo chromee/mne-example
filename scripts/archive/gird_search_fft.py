@@ -37,19 +37,19 @@ def grid_search(subject=1):
 
     params = {"csp__n_components": np.arange(4, 10),
               "fft__R": np.arange(40, 110, 20),
-              "svm__C": np.arange(1000, 10000, 2000),
-              "svm__gamma": np.logspace(-4, -3, 2)}
+              "svm__C": np.arange(1, 101, 25),
+              "svm__gamma": np.logspace(-2, 2, 4)}
 
-    clf = GridSearchCV(pl, params, n_jobs=-1, cv=5)
+    clf = GridSearchCV(pl, params, n_jobs=3, cv=5, return_train_score=True)
     clf.fit(epochs_data_train, labels)
     df = pd.DataFrame(clf.cv_results_)
-    df.to_excel("data/grid_fft/grid_fft_%s.xlsx" %
+    df.to_excel("data/grid_fft/grid_fft_%s_1.xlsx" %
                 subject, index=False, header=True)
     print("%s end" % subject)
 
 
 if __name__ == "__main__":
-    # grid_search(1)
+    grid_search(1)
 
-    for i in range(2, 110):
-        grid_search(i)
+    # for i in range(2, 110):
+    #     grid_search(i)

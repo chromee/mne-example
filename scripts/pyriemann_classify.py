@@ -66,12 +66,51 @@ def get_score(subject=7, runs=[6, 10, 14], event_id=dict(hands=2, feet=3)):
 
 
 if __name__ == "__main__":
-    # print(get_score(subject=10)["mean_test_score"])
+    df = get_score(subject=10)
+    df["subject"] = pd.Series([10], index=df.index)
+    print(df)
+    exit()
 
     results = []
     for i in range(1, 110):
         print(i)
-        results.append(
-            get_score(subject=i, event_id=dict(rest=1, hands=2, feet=3)))
+        df = get_score(subject=i, runs=[6, 10, 14],
+                       event_id=dict(hands=2, feet=3))
+        df["subject"] = pd.Series([i], index=df.index)
+        results.append(df)
     df = pd.concat(results)
-    df.to_excel("data/three_class_riemann.xlsx", index=False)
+    df.to_excel(
+        "data/hands_vs_feet_two_class_pyriemann_scores.xlsx", index=False)
+
+    results = []
+    for i in range(1, 110):
+        print(i)
+        df = get_score(subject=i, runs=[6, 10, 14],
+                       event_id=dict(rest=1, hands=2, feet=3))
+        df["subject"] = pd.Series([i], index=df.index)
+        results.append(df)
+    df = pd.concat(results)
+    df.to_excel(
+        "data/hands_vs_feet_three_class_pyriemann_scores.xlsx", index=False)
+
+    results = []
+    for i in range(1, 110):
+        print(i)
+        df = get_score(subject=i, runs=[4, 8, 12],
+                       event_id=dict(left=2, right=3))
+        df["subject"] = pd.Series([i], index=df.index)
+        results.append(df)
+    df = pd.concat(results)
+    df.to_excel(
+        "data/left_vs_right_two_class_pyriemann_scores.xlsx", index=False)
+
+    results = []
+    for i in range(1, 110):
+        print(i)
+        df = get_score(subject=i, runs=[4, 8, 12],
+                       event_id=dict(rest=1, left=2, right=3))
+        df["subject"] = pd.Series([i], index=df.index)
+        results.append(df)
+    df = pd.concat(results)
+    df.to_excel(
+        "data/left_vs_right_three_class_pyriemann_scores.xlsx", index=False)
